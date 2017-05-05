@@ -190,7 +190,7 @@ class JD(object):
             timeArray = time.mktime(time.strptime(set_time,'%Y-%m-%d %H:%M:%S'))
             while True:
                 if time.time() >= timeArray:
-                    print(input('大于大于：'))
+                    print('正在提交订单...')
                     req8 = s.post(submitOrder, data=submit_data)
                     js1 = json.loads(req8.text)
                     print(js1)
@@ -208,6 +208,7 @@ class JD(object):
         elif ordertime == '2':
 
             req8 = s.post(submitOrder, data=submit_data)
+            print('正在提交订单...')
             js1 = json.loads(req8.text)
 
             # 判断是否下单成功
