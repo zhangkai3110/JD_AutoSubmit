@@ -13,9 +13,9 @@ url = 'https://passport.jd.com/new/login.aspx'
 headers = {
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
         'ContentType': 'text/html; charset=utf-8',
-		'Accept-Encoding':'gzip, deflate, sdch',
+        'Accept-Encoding':'gzip, deflate, sdch',
         'Accept-Language':'zh-CN,zh;q=0.8',
-		'Connection' : 'keep-alive',
+        'Connection' : 'keep-alive',
 }
 
 s = requests.Session()
@@ -150,7 +150,7 @@ class JD(object):
                 'packId': '0',
                 'targetId': '0',
                 'promoID': '0',
-                'locationId': '1 - 2810 - 6501 - 0'  # 地址代码
+                'locationId': '1-2810-6501-0'  # 地址代码
         }
 
         req6 = s.post(cancelitemurl, data=form_data)
@@ -182,7 +182,7 @@ class JD(object):
 
         ordertime = input('''请选择：
                           1.设置下单时间
-                          2.选择立即下单
+                          2.选择立即下单(可用于监控库存，自动下单)
                           请输入选择（1/2):
                           ''')
 
@@ -191,6 +191,7 @@ class JD(object):
             timeArray = time.mktime(time.strptime(set_time,'%Y-%m-%d %H:%M:%S'))
             while True:
                 if time.time() >= timeArray:
+
                     print('正在提交订单...')
                     req8 = s.post(submitOrder, data=submit_data)
                     js1 = json.loads(req8.text)
@@ -202,20 +203,36 @@ class JD(object):
                         print('下单失败')
                     break
                 else:
-                    
+                    # print('等待下单...')
                     continue
-
+        # 直接下单
         elif ordertime == '2':
+            while True:
+                area = '1_2810_6501_0'  # 地址编码，这里请替换成自己地区的编码
+                stockurl = 'http://c0.3.cn/stock?skuId=' + self.pid + '&cat=652,829,854&area=' + area + '&extraParam={%22originid%22:%221%22}'
+                resp = s.get(stockurl)
+                jsparser = json.loads(resp.text)
+                # 33 有货 34 无货
+                if jsparser['stock']['StockState'] == 33 and jsparser['stock']['StockStateName'] == '现货':
+                    print('库存状态：',jsparser['stock']['StockStateName'])
 
-            req8 = s.post(submitOrder, data=submit_data)
-            print('正在提交订单...')
-            js1 = json.loads(req8.text)
+                    req8 = s.post(submitOrder, data=submit_data)
+                    print('正在提交订单...')
+                    js1 = json.loads(req8.text)
 
-            # 判断是否下单成功
-            if js1['success'] == True:
-                print('下单成功!')
-            else:
-                print('下单失败')
+                    # 判断是否下单成功
+                    if js1['success'] == True:
+                        print('下单成功!')
+                        break
+                    else:
+                        print('下单失败')
+                        # 3秒后重新尝试下单，可自行修改时间间隔
+                        time.sleep(3)
+                        continue
+                elif jsparser['stock']['StockState'] != 33:
+                    print('无货，监控中...')
+                    time.sleep(3) # 请酌情修改时间间隔，最少1秒
+                    continue
 
 
 if __name__ == '__main__':
