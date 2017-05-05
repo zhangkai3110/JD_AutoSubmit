@@ -76,6 +76,7 @@ class JD(object):
         # 验证码图片
         imgcode = 'http:' + sel.xpath('//img[@id="JD_Verification1"]/@src2')[0]
         img = requests.get(imgcode)
+        # 把这个路径替换成自己电脑jd.py文件夹的路径，/Users/zhangkai/Desktop/JD
         with open('/Users/zhangkai/Desktop/JD/a.jpg', 'wb') as f:
             f.write(img.content)
         im = open('a.jpg','rb').read()
