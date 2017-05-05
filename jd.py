@@ -44,6 +44,7 @@ class JD(object):
         self.password = password
         self.rkclient = RClient(rk_username,rk_pwd)
         self.trackid = ''
+        self.pid = ''
 
     # 账号登录函数
     def login(self):
@@ -122,9 +123,9 @@ class JD(object):
 
     def addcart(self):
 
-        pid = input('请输入要加入购物车的商品编号：')
+        self.pid = input('请输入要加入购物车的商品编号：')
         pcount = input('请输入加入数量：')
-        add_carturl = 'https://cart.jd.com/gate.action?pid='+pid+'&pcount='+pcount+'&ptype=1'
+        add_carturl = 'https://cart.jd.com/gate.action?pid='+self.pid+'&pcount='+pcount+'&ptype=1'
         # add_carturl = 'https://cart.jd.com/gate.action?pid=3659204&pcount=1&ptype=1'
 
         req4 = s.get(add_carturl)
@@ -144,7 +145,7 @@ class JD(object):
         cancelitemurl = 'https://cart.jd.com/cancelItem.action?rd' + str(r)
         form_data = {
                 'outSkus':'',
-                'pid':'3659204', # 商品id
+                'pid':self.pid, # 商品id
                 'ptype': '1',
                 'packId': '0',
                 'targetId': '0',
@@ -201,8 +202,7 @@ class JD(object):
                         print('下单失败')
                     break
                 else:
-                    print('设置时间出错')
-                    set_time = input('请按照2017-05-01 23:11:11格式输入下单时间:')
+                    
                     continue
 
         elif ordertime == '2':
